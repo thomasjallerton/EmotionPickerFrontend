@@ -6,8 +6,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -28,6 +31,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,6 +43,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.location.places.GeoDataClient;
@@ -62,12 +67,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -114,7 +117,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Camera camera = Camera.open(1);
         try {
             List<Camera.Size> sizes = camera.getParameters().getSupportedPictureSizes();
-            camera.getParameters().setPictureSize(sizes.get(0).width, sizes.get(0).height);
+            int width = sizes.get(0).width;
+            int height = sizes.get(0).height;
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.set("jpeg-quality", 70);
+            parameters.setPictureFormat(PixelFormat.JPEG);
+            parameters.setPictureSize(width, height);
+            camera.setParameters(parameters);
             camera.setPreviewTexture(st);
             camera.startPreview();
             camera.takePicture(null, null, jpegCallback);
@@ -129,12 +138,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
         public void onPictureTaken(byte[] data, Camera camera)
         {
-            FileOutputStream outStream = null;
             try {
-                socket.emit("image", data);
+
+                Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
+                realImage = rotate(realImage, 270);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                realImage.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+                byte[] byteArray = stream.toByteArray();
+
+                socket.emit("image", byteArray);
                 showToast("Sent photo");
-            } finally
-            {
+            } catch (Exception e) {
+
+            } finally {
                 camera.stopPreview();
                 camera.release();
                 camera = null;
@@ -143,6 +159,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(TAG, "onPictureTaken - jpeg");
         }
     };
+
+    public static Bitmap rotate(Bitmap bitmap, int degree) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Matrix mtx = new Matrix();
+        //       mtx.postRotate(degree);
+        mtx.setRotate(degree);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+    }
 
     public void titleView(Place place) {
         TextView title = findViewById(R.id.title);
@@ -269,7 +296,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             socket = IO.socket(SERVER_IP);
             socket.connect();
             Log.e(TAG, "SUCCESSFULLY CONNECTED");
-
+            socket.on("emotions", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    Log.d("EMOTIONS", args[0].toString());
+                }
+            });
         } catch (URISyntaxException e) {
 
         }
@@ -278,7 +310,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         imagesView = findViewById(R.id.images);
         ratingsView = findViewById(R.id.reviews);
 
-        HashSet<Place> places = (HashSet<Place>) getIntent().getSerializableExtra("places");
+        takeSnapShots();
+        /*HashSet<Place> places = (HashSet<Place>) getIntent().getSerializableExtra("places");
         int count = 0;
         int time = 0;
         for (final Place place : places) {
@@ -306,6 +339,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }, time);
             time += 10000;
-        }
+        }*/
     }
 }

@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_vertical"
     tools:context="ichack18.emotionpicker.StartActivity">
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:layout_toLeftOf="@+id/start"
         android:layout_marginLeft="8dp"
         android:id="@+id/location_text"/>
@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:text="Start!"
         android:id="@id/start"
-        android:gravity="center_vertical"
         android:layout_alignParentRight="true"
         android:layout_marginRight="8dp"
         android:layout_marginLeft="8dp"/>

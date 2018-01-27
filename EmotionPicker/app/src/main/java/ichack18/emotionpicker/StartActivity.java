@@ -11,6 +11,8 @@ import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONObject;
+
 public class StartActivity extends AppCompatActivity {
 
     Socket socket;
@@ -40,6 +42,8 @@ public class StartActivity extends AppCompatActivity {
                 EditText text = (EditText) findViewById(R.id.location_text);
                 if (text.getText().toString() != null && text.getText().toString().length() > 0) {
                     if (socket != null) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("location", )
                         socket.emit("location_info", null);
                     }
                 }

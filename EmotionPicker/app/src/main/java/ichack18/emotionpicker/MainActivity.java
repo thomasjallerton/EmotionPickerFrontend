@@ -70,7 +70,10 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+
+import static android.view.View.GONE;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -108,73 +111,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void takeSnapShots()
-    {
-        Toast.makeText(getApplicationContext(), "Image snapshot Started",Toast.LENGTH_SHORT).show();
-        // here below "this" is activity context.
-        SurfaceView surface = new SurfaceView(this);
-        SurfaceTexture st = new SurfaceTexture(10);
-        Camera camera = Camera.open(1);
-        try {
-            List<Camera.Size> sizes = camera.getParameters().getSupportedPictureSizes();
-            int width = sizes.get(0).width;
-            int height = sizes.get(0).height;
-            Camera.Parameters parameters = camera.getParameters();
-            parameters.set("jpeg-quality", 70);
-            parameters.setPictureFormat(PixelFormat.JPEG);
-            parameters.setPictureSize(width, height);
-            camera.setParameters(parameters);
-            camera.setPreviewTexture(st);
-            camera.startPreview();
-            camera.takePicture(null, null, jpegCallback);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-
-    /** picture call back */
-    Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
-        public void onPictureTaken(byte[] data, Camera camera)
-        {
-            try {
-
-                Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
-                realImage = rotate(realImage, 270);
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                realImage.compress(Bitmap.CompressFormat.JPEG, 70, stream);
-                byte[] byteArray = stream.toByteArray();
-
-                socket.emit("image", byteArray);
-                showToast("Sent photo");
-            } catch (Exception e) {
-
-            } finally {
-                camera.stopPreview();
-                camera.release();
-                camera = null;
-                Toast.makeText(getApplicationContext(), "Image snapshot Done",Toast.LENGTH_LONG).show();
-            }
-            Log.d(TAG, "onPictureTaken - jpeg");
-        }
-    };
-
-    public static Bitmap rotate(Bitmap bitmap, int degree) {
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
-        Matrix mtx = new Matrix();
-        //       mtx.postRotate(degree);
-        mtx.setRotate(degree);
-
-        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
-    }
-
     public void titleView(Place place) {
         TextView title = findViewById(R.id.title);
         TextView address = findViewById(R.id.address);
-
+        title.setVisibility(View.VISIBLE);
         //set the title and address
         title.setText(place.getTitle());
         address.setText(place.getAddress());
@@ -185,8 +125,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
 
         titleView.setVisibility(View.VISIBLE);
-        ratingsView.setVisibility(View.GONE);
-        imagesView.setVisibility(View.GONE);
+        ratingsView.setVisibility(GONE);
+        imagesView.setVisibility(GONE);
     }
 
     public void ratingsView(Place place) {
@@ -229,9 +169,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }, null);
         queue.add(request);
 
-        titleView.setVisibility(View.GONE);
+        titleView.setVisibility(GONE);
         ratingsView.setVisibility(View.VISIBLE);
-        imagesView.setVisibility(View.GONE);
+        imagesView.setVisibility(GONE);
 
         //takeSnapShots();
     }
@@ -277,8 +217,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        titleView.setVisibility(View.GONE);
-        ratingsView.setVisibility(View.GONE);
+        titleView.setVisibility(GONE);
+        ratingsView.setVisibility(GONE);
         imagesView.setVisibility(View.VISIBLE);
     }
 
@@ -302,6 +242,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d("EMOTIONS", args[0].toString());
                 }
             });
+            socket.on("best-place", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    int placeid = (int) args[0];
+                    titleView(placesArray[placeid]);
+                }
+            });
         } catch (URISyntaxException e) {
 
         }
@@ -310,35 +257,63 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         imagesView = findViewById(R.id.images);
         ratingsView = findViewById(R.id.reviews);
 
-        takeSnapShots();
-        /*HashSet<Place> places = (HashSet<Place>) getIntent().getSerializableExtra("places");
-        int count = 0;
+        HashSet<Place> places = (HashSet<Place>) getIntent().getSerializableExtra("places");
         int time = 0;
+        int placeindex = 0;
+        final Handler handler = new Handler();
         for (final Place place : places) {
-            placesArray[count] = place;
-            count++;
-            final Handler handler = new Handler();
+            placesArray[placeindex] = place;
+            placeindex++;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     titleView(place);
                 }
             }, time);
-            time += 10000;
+            time += 3000;
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                   new CameraTask(MainActivity.this, socket).execute();
+                }
+            }, time);
+            time += 7000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     imagesView(place);
                 }
             }, time);
-            time += 10000;
+            time += 3000;
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    new CameraTask(MainActivity.this, socket).execute();
+                }
+            }, time);
+            time += 7000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     ratingsView(place);
                 }
             }, time);
-            time += 10000;
-        }*/
+            time += 3000;
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    new CameraTask(MainActivity.this, socket).execute();
+                }
+            }, time);
+            time += 7000;
+        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ratingsView.setVisibility(GONE);
+                TextView titletext = findViewById(R.id.title);
+                titletext.setVisibility(GONE);
+            }
+        }, time);
     }
 }

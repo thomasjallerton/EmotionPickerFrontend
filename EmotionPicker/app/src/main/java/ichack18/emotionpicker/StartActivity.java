@@ -95,21 +95,6 @@ public class StartActivity extends AppCompatActivity {
                                         obj.put("lng", location.getLongitude());
                                         String txt = text.getText().toString();
                                         socket.emit("search-places", txt, obj);
-                                        /*FOR TESTING ONLY
-                                        HashSet<Place> places = new HashSet<>();
-                                        Place place = new Place();
-                                        place.setAddress("Some avenue, somewhere");
-                                        place.setOpennow(true);
-                                        place.setPlaceID("ChIJN1t_tDeuEmsRUsoyG83frY4");
-                                        place.setRating(4);
-                                        place.setTitle("The best place ever");
-
-                                        places.add(place);
-
-                                        Intent i = new Intent(StartActivity.this, MainActivity.class);
-
-                                        i.putExtra("places", places);
-                                        startActivity(i);*/
 
                                     } catch (JSONException e) {
                                         e.printStackTrace();

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -18,6 +19,7 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.vision.text.Text;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +47,19 @@ public class StartActivity extends AppCompatActivity {
         try {
             socket = IO.socket(MainActivity.SERVER_IP);
             socket.connect();
+            socket.on("number-of-clients", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    final int number = (int) args[0];
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView numClients = findViewById(R.id.number_clients);
+                            numClients.setText("Connected: " + number);
+                        }
+                    });
+                }
+            });
 
             socket.on("place-results", new Emitter.Listener() {
                 @Override

@@ -4,24 +4,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical"
     android:background="@color/colorPrimary"
     tools:context="ichack18.emotionpicker.StartActivity">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/start"
-        android:textColor="@color/white"
-        android:layout_marginLeft="8dp"
-        android:id="@+id/location_text"/>
-
-    <Button
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start!"
-        android:id="@id/start"
+        android:layout_centerVertical="true">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/start"
+            android:textColor="@color/white"
+            android:layout_below="@+id/logo"
+            android:hint="Where do you want to go?"
+            android:textColorHint="@color/background"
+            android:layout_marginLeft="8dp"
+            android:id="@+id/location_text"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lets Go!"
+            android:id="@id/start"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/logo"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:id="@+id/logo"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/logo"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:textSize="18sp"
+        android:textColor="@color/background"
+        android:id="@+id/number_clients"
         android:layout_marginRight="8dp"
-        android:layout_marginLeft="8dp"/>
+        android:layout_marginBottom="8dp"/>
 </RelativeLayout>

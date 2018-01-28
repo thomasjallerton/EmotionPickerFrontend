@@ -54,7 +54,7 @@ public class ResultActivity extends AppCompatActivity implements OnMapReadyCallb
         TextView address = findViewById(R.id.address);
         title.setVisibility(View.VISIBLE);
         //set the title and address
-        title.setText(place.getTitle());
+        title.setText("You are going to:\n" + place.getTitle());
         address.setText(place.getAddress());
 
 

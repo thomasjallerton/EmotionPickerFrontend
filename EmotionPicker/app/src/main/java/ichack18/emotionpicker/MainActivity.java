@@ -69,9 +69,11 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import static android.view.View.GONE;
@@ -146,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ratingbar.setRating(place.getRating());
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place.getPlaceID() + "&key=AIzaSyDyz2RwNSa3qDRfnclcIgUUWS7Fn5NexfA";
+        String url ="https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place.getPlaceID() + "&key=AIzaSyDPFxFyh9hvR7OY4bu8ZU7GVKTHY6YCC2s";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
                 null, new Response.Listener<JSONObject>() {
@@ -241,13 +243,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             socket = IO.socket(SERVER_IP);
             socket.connect();
-            Log.e(TAG, "SUCCESSFULLY CONNECTED");
-            socket.on("emotions", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.d("EMOTIONS", args[0].toString());
-                }
-            });
             socket.on("best-place", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
@@ -270,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         imagesView = findViewById(R.id.images);
         ratingsView = findViewById(R.id.reviews);
 
-        HashSet<Place> places = (HashSet<Place>) getIntent().getSerializableExtra("places");
+        ArrayList<Place> places = (ArrayList<Place>) getIntent().getSerializableExtra("places");
         Log.d(TAG, "number of places: " + places.size());
 
         int time = 0;
@@ -333,7 +328,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         socket.disconnect();
+        super.onDestroy();
     }
+
+    @Override
+    public void onStop() {
+        socket.disconnect();
+        Log.e("DISCONNECTING", "DISCONNECTED");
+        super.onStop();
+    }
+
+
 }

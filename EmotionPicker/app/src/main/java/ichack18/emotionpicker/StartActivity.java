@@ -23,7 +23,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class StartActivity extends AppCompatActivity {
 
@@ -40,13 +42,13 @@ public class StartActivity extends AppCompatActivity {
         try {
             socket = IO.socket(MainActivity.SERVER_IP);
             socket.connect();
-            Log.e("StartActivity", "SUCCESSFULLY CONNECTED");
 
             socket.on("place-results", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     JSONArray array = (JSONArray) args[0];
-                    HashSet<Place> places = new HashSet<>();
+                    ArrayList<Place> places = new ArrayList<Place>();
+                    Log.e("StartActivity", array.toString());
 
                     try {
                         for (int i = 0; i < array.length(); i++) {
@@ -54,7 +56,11 @@ public class StartActivity extends AppCompatActivity {
                             Place place = new Place();
                             place.setAddress(obj.getString("formatted_address"));
                             place.setPlaceID(obj.getString("place_id"));
-                            place.setRating(obj.getInt("rating"));
+                            if (obj.has("rating")) {
+                                place.setRating(obj.getInt("rating"));
+                            } else {
+                                place.setRating(0550);
+                            }
                             place.setTitle(obj.getString("name"));
                             JSONObject location = obj.getJSONObject("geometry").getJSONObject("location");
                             place.setLat(location.getDouble("lat"));

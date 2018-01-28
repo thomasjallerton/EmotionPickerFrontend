@@ -11,6 +11,7 @@ import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.Toast;
@@ -48,6 +49,10 @@ public class CameraTask extends AsyncTask<Void, Void, Void> {
 
     private void takeSnapShots()
     {
+        if (Looper.myLooper() == null)
+        {
+            Looper.prepare();
+        }
         SurfaceView surface = new SurfaceView(context);
         SurfaceTexture st = new SurfaceTexture(10);
         newOpenCamera();
@@ -102,15 +107,6 @@ public class CameraTask extends AsyncTask<Void, Void, Void> {
         mtx.setRotate(degree);
 
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
-    }
-
-    private void showToast(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void newOpenCamera() {

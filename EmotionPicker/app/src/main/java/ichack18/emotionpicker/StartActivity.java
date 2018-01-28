@@ -53,7 +53,6 @@ public class StartActivity extends AppCompatActivity {
                             JSONObject obj = array.getJSONObject(i);
                             Place place = new Place();
                             place.setAddress(obj.getString("formatted_address"));
-                            place.setOpennow(obj.getJSONObject("opening_hours").getBoolean("open_now"));
                             place.setPlaceID(obj.getString("place_id"));
                             place.setRating(obj.getInt("rating"));
                             place.setTitle(obj.getString("name"));
@@ -95,7 +94,7 @@ public class StartActivity extends AppCompatActivity {
                                         obj.put("lng", location.getLongitude());
                                         String txt = text.getText().toString();
                                         socket.emit("search-places", txt, obj);
-
+                                        Log.d("Start", "Send start to server!");
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }

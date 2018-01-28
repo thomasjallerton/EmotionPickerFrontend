@@ -5,12 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
+    android:background="@color/colorPrimary"
     tools:context="ichack18.emotionpicker.StartActivity">
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@+id/start"
+        android:textColor="@color/white"
         android:layout_marginLeft="8dp"
         android:id="@+id/location_text"/>
 

@@ -70,6 +70,7 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -82,14 +83,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String TAG = MainActivity.class.getSimpleName();
     //public static final String SERVER_IP = "http://129.31.206.169:8080";
     public static final String SERVER_IP = "https://emotion-picker.herokuapp.com";
-    private Place[] placesArray = new Place[3];
 
     private Socket socket;
     private View titleView;
     private View imagesView;
     private View ratingsView;
     private GoogleMap mMap;
-
+    private HashMap<String, Place> placeHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    public void titleView(Place place) {
+    public void titleView(final Place place) {
         TextView title = findViewById(R.id.title);
         TextView address = findViewById(R.id.address);
         title.setVisibility(View.VISIBLE);
@@ -119,14 +119,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         title.setText(place.getTitle());
         address.setText(place.getAddress());
 
+
         mMap.clear();
         LatLng location = new LatLng(place.getLat(), place.getLongi());
         mMap.addMarker(new MarkerOptions().position(location));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
 
+        View titleView = findViewById(R.id.title_address);
+        View ratingsView = findViewById(R.id.reviews);
+        View imagesView = findViewById(R.id.images);
+
         titleView.setVisibility(View.VISIBLE);
         ratingsView.setVisibility(GONE);
         imagesView.setVisibility(GONE);
+
     }
 
     public void ratingsView(Place place) {
@@ -193,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Get the first photo in the list.
                 int count = 0;
                 for (PlacePhotoMetadata photoMetadata : photoMetadataBuffer) {
-                    if (count > 10) break;
+                    if (count > 2) break;
                     count++;
                     // Get the attribution text.
                     CharSequence attribution = photoMetadata.getAttributions();
@@ -245,8 +251,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             socket.on("best-place", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    int placeid = (int) args[0];
-                    titleView(placesArray[placeid]);
+                    String placeid = (String) args[0];
+                    Place place = placeHashMap.get(placeid);
+                    if (place != null) {
+                        Intent i = new Intent(MainActivity.this, ResultActivity.class);
+                        i.putExtra("place", place);
+                        startActivity(i);
+                    } else {
+                        Log.d(TAG, "Place was null!");
+                    }
                 }
             });
         } catch (URISyntaxException e) {
@@ -258,54 +271,55 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ratingsView = findViewById(R.id.reviews);
 
         HashSet<Place> places = (HashSet<Place>) getIntent().getSerializableExtra("places");
+        Log.d(TAG, "number of places: " + places.size());
+
         int time = 0;
-        int placeindex = 0;
         final Handler handler = new Handler();
+
         for (final Place place : places) {
-            placesArray[placeindex] = place;
-            placeindex++;
+            placeHashMap.put(place.getPlaceID(), place);
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     titleView(place);
                 }
             }, time);
-            time += 3000;
+            time += 1000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                   new CameraTask(MainActivity.this, socket).execute();
+                   new CameraTask(MainActivity.this, place.getPlaceID(), socket).execute();
                 }
             }, time);
-            time += 7000;
+            time += 6000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     imagesView(place);
                 }
             }, time);
-            time += 3000;
+            time += 1000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    new CameraTask(MainActivity.this, socket).execute();
+                    new CameraTask(MainActivity.this, place.getPlaceID(), socket).execute();
                 }
             }, time);
-            time += 7000;
+            time += 6000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     ratingsView(place);
                 }
             }, time);
-            time += 3000;
+            time += 1000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    new CameraTask(MainActivity.this, socket).execute();
+                    new CameraTask(MainActivity.this, place.getPlaceID(), socket).execute();
                 }
             }, time);
-            time += 7000;
+            time += 6000;
         }
         handler.postDelayed(new Runnable() {
             @Override
@@ -315,5 +329,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 titletext.setVisibility(GONE);
             }
         }, time);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        socket.disconnect();
     }
 }

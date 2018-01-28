@@ -23,6 +23,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -330,13 +332,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onDestroy() {
         socket.disconnect();
         super.onDestroy();
-    }
-
-    @Override
-    public void onStop() {
-        socket.disconnect();
-        Log.e("DISCONNECTING", "DISCONNECTED");
-        super.onStop();
     }
 
 

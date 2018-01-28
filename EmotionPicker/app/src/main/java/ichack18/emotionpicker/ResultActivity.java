@@ -1,6 +1,7 @@
 package ichack18.emotionpicker;
 
 import android.*;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -63,5 +64,12 @@ public class ResultActivity extends AppCompatActivity implements OnMapReadyCallb
         mMap.addMarker(new MarkerOptions().position(location));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this, StartActivity.class);
+        startActivity(i);
+        finish();
     }
 }

@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String placeid = (String) args[0];
                     Place place = placeHashMap.get(placeid);
                     if (place != null) {
+                        socket.disconnect();
                         Intent i = new Intent(MainActivity.this, ResultActivity.class);
                         i.putExtra("place", place);
                         startActivity(i);

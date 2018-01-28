@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EmotionPicker</string>
+    <string name="app_name">FaceValue</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_result">ResultActivity</string>
 </resources>

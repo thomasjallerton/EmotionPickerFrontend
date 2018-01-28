@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         queue.add(request);
 
         final LinearLayout ll2 = findViewById(R.id.images_container);
-        ll.removeAllViewsInLayout();
+        ll2.removeAllViewsInLayout();
 
         //Add images to container
         final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(place.getPlaceID());

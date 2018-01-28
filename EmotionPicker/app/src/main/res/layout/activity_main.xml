@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -14,92 +15,98 @@
             android:textAlignment="center"
             android:textSize="28sp"
             android:paddingTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="2dp"
             android:background="@color/white"
             android:elevation="2dp"
             android:id="@+id/title"/>
 
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/title_address">
-
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:paddingBottom="8dp"
-                android:background="@color/white"
-                android:textSize="20sp"
-                android:id="@+id/address"/>
-
-            <fragment android:id="@+id/map"
-                      android:name="com.google.android.gms.maps.SupportMapFragment"
-                      android:layout_width="match_parent"
-                      android:layout_height="300dp"
-                      tools:context="ichack18.emotionpicker.MapsActivity"
-                      android:layout_below="@+id/address"/>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/images">
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/image_scroll">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:id="@+id/images_container">
-                </LinearLayout>
-            </ScrollView>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/reviews">
+            android:id="@+id/main_scroll">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/star_wrapper"
-                android:background="@color/white"
-                android:elevation="2dp"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="8dp">
-                <RatingBar
-                    android:layout_width="wrap_content"
-                    android:numStars="5"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:foregroundGravity="center_horizontal"
-                    android:id="@+id/ratingbar"
-                    android:isIndicator="true"
-                    android:stepSize="0.1"/>
-            </LinearLayout>
-
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/star_wrapper"
-                android:id="@+id/reviews_scroll">
-                <LinearLayout
+                android:orientation="vertical">
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:id="@+id/reviews_container">
-                </LinearLayout>
-            </ScrollView>
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:elevation="2dp"
+                    android:id="@+id/title_address">
 
-        </RelativeLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/star_wrapper"
+                        android:background="@color/white"
+                        android:elevation="2dp"
+                        android:gravity="center_horizontal"
+                        android:layout_marginBottom="8dp">
+                        <RatingBar
+                            android:layout_width="wrap_content"
+                            android:numStars="5"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:foregroundGravity="center_horizontal"
+                            android:id="@+id/ratingbar"
+                            android:isIndicator="true"
+                            android:stepSize="0.1"/>
+                    </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_below="@+id/star_wrapper"
+                        android:layout_marginBottom="8dp"
+                        android:elevation="2dp"
+                        android:id="@+id/images">
+                        <HorizontalScrollView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:id="@+id/images_container">
+                            </LinearLayout>
+                        </HorizontalScrollView>
+                    </LinearLayout>
+
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:paddingBottom="8dp"
+                        android:background="@color/white"
+                        android:textSize="20sp"
+                        android:layout_below="@+id/images"
+                        android:id="@+id/address"/>
+
+                    <fragment android:id="@+id/map"
+                              android:name="com.google.android.gms.maps.SupportMapFragment"
+                              android:layout_width="match_parent"
+                              android:layout_height="300dp"
+                              tools:context="ichack18.emotionpicker.MapsActivity"
+                              android:layout_below="@+id/address"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/reviews">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:id="@+id/reviews_container">
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
-

@@ -88,9 +88,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String SERVER_IP = "https://emotion-picker.herokuapp.com";
 
     private Socket socket;
-    private View titleView;
-    private View imagesView;
-    private View ratingsView;
     private GoogleMap mMap;
     private HashMap<String, Place> placeHashMap = new HashMap<>();
 
@@ -115,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    public void titleView(final Place place) {
+    public void setupViews(final Place place) {
         TextView title = findViewById(R.id.title);
         TextView address = findViewById(R.id.address);
         title.setVisibility(View.VISIBLE);
@@ -129,19 +126,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.addMarker(new MarkerOptions().position(location));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
 
-        View titleView = findViewById(R.id.title_address);
-        View ratingsView = findViewById(R.id.reviews);
-        View imagesView = findViewById(R.id.images);
-
-        titleView.setVisibility(View.VISIBLE);
-        ratingsView.setVisibility(GONE);
-        imagesView.setVisibility(GONE);
-
-    }
-
-    public void ratingsView(Place place) {
         RatingBar ratingbar = findViewById(R.id.ratingbar);
-        ScrollView reviewsScroll = findViewById(R.id.reviews_scroll);
         final LinearLayout ll = findViewById(R.id.reviews_container);
         final GeoDataClient mGeoDataClient = Places.getGeoDataClient(this, null);
         ll.removeAllViewsInLayout();
@@ -150,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ratingbar.setRating(place.getRating());
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place.getPlaceID() + "&key=AIzaSyDPFxFyh9hvR7OY4bu8ZU7GVKTHY6YCC2s";
+        String url ="https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place.getPlaceID() + "&key=AIzaSyDbsQI6jFs8RzwS7JkWtYcydRFaYchv2IU";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
                 null, new Response.Listener<JSONObject>() {
@@ -160,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     JSONArray reviews = response.getJSONObject("result").getJSONArray("reviews");
                     LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     llp.setMargins(0,0,0,20);
-                    for (int i = 0; i < 5 || i < reviews.length(); i++) {
+                    for (int i = 0; i < 4 && i < reviews.length(); i++) {
                         TextView text = new TextView(MainActivity.this);
                         text.setBackgroundResource(R.color.white);
                         text.setElevation(4);
@@ -179,17 +164,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }, null);
         queue.add(request);
 
-        titleView.setVisibility(GONE);
-        ratingsView.setVisibility(View.VISIBLE);
-        imagesView.setVisibility(GONE);
-
-        //takeSnapShots();
-    }
-
-    public void imagesView(Place place) {
-        final LinearLayout ll = findViewById(R.id.images_container);
+        final LinearLayout ll2 = findViewById(R.id.images_container);
         ll.removeAllViewsInLayout();
-        final GeoDataClient mGeoDataClient = Places.getGeoDataClient(this, null);
 
         //Add images to container
         final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(place.getPlaceID());
@@ -203,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Get the first photo in the list.
                 int count = 0;
                 for (PlacePhotoMetadata photoMetadata : photoMetadataBuffer) {
-                    if (count > 2) break;
+                    if (count > 5) break;
                     count++;
                     // Get the attribution text.
                     CharSequence attribution = photoMetadata.getAttributions();
@@ -219,17 +195,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             imageView.setAdjustViewBounds(true);
                             imageView.setMaxWidth(700);
                             imageView.setImageBitmap(bitmap);
-                            ll.addView(imageView);
+                            ll2.addView(imageView);
                         }
                     });
                 }
                 photoMetadataBuffer.release();
             }
         });
-
-        titleView.setVisibility(GONE);
-        ratingsView.setVisibility(GONE);
-        imagesView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -263,10 +235,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
 
-        titleView = findViewById(R.id.title_address);
-        imagesView = findViewById(R.id.images);
-        ratingsView = findViewById(R.id.reviews);
-
         ArrayList<Place> places = (ArrayList<Place>) getIntent().getSerializableExtra("places");
         Log.d(TAG, "number of places: " + places.size());
 
@@ -278,7 +246,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    titleView(place);
+                    ScrollView sv = findViewById(R.id.main_scroll);
+                    sv.fullScroll(ScrollView.FOCUS_UP);
+
+                    setupViews(place);
                 }
             }, time);
             time += 1000;
@@ -292,38 +263,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    imagesView(place);
-                }
-            }, time);
-            time += 1000;
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
                     new CameraTask(MainActivity.this, place.getPlaceID(), socket).execute();
                 }
             }, time);
-            time += 6000;
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ratingsView(place);
-                }
-            }, time);
-            time += 1000;
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    new CameraTask(MainActivity.this, place.getPlaceID(), socket).execute();
-                }
-            }, time);
-            time += 6000;
+            time += 3000;
         }
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                ratingsView.setVisibility(GONE);
-                TextView titletext = findViewById(R.id.title);
-                titletext.setVisibility(GONE);
+                findViewById(R.id.reviews).setVisibility(GONE);
+                findViewById(R.id.title_address).setVisibility(GONE);
+                findViewById(R.id.images).setVisibility(GONE);
+                findViewById(R.id.title).setVisibility(GONE);
             }
         }, time);
     }
